@@ -29,6 +29,9 @@ urlpatterns=[
     path('wishlist/id',wishlist,name="wishlist"),
     path('add_to_wishlist/id',add_to_wishlist,name="add_to_wishlist"),
 
-    # checkout functionality
+    # checkout and order functionality
     path('chekout',checkout,name="checkout"),
+    path('add_address',add_address,name="add_address"),
+    # path('order',order,name="order"),
+    # path('orderitem',orderitem,name="orderitem")
 ]

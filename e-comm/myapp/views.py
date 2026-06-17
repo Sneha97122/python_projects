@@ -186,7 +186,24 @@ def wishlist(request):
 
 # checkout functionality
 def checkout(request):
-    return render(request,"checkout.html")
+    cart=Cart.objects.filter(user=request.user)
+    address=Address.objects.filter(user=request.user)
+    total=0
+    for c in cart:
+        total += c.total_price()
+
+    return render(request,"checkout.html",{"cart":cart,"address":address,"total":total})
 
 
+def add_address(request):
+    if request.method =='POST':
+        address=request.POST.get('address')
+        city=request.POST.get('city')
+        pincode=request.POST.get('pincode')
+
+        Address.objects.create(
+            user=request.user,address=address,city=city,pincode=pincode
+        )
+        return redirect('checkout')
+    return render(request,"add_address.html")
 
