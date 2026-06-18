@@ -43,13 +43,46 @@ class Wishlist(models.Model):
     product=models.ForeignKey(Product,on_delete=models.CASCADE)
 
 
-class Order(models.Model):
-    user=models.ForeignKey(User,on_delete=models.CASCADE)
-    address=models.ForeignKey(Address,on_delete=models.CASCADE)
-    total_amount=models.DecimalField(max_digits=10,decimal_places=2)
-    status=models.CharField(max_length=20,default="pending")
 
-    created_at=models.DateTimeField(auto_now_created=True)
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    address = models.ForeignKey(Address, on_delete=models.CASCADE)
+
+    total_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    payment_method = models.CharField(
+        max_length=20,
+        default="Cash On Delivery"
+    )
+
+    payment_status = models.CharField(
+        max_length=20,
+        default="Pending"
+    )
+
+    status = models.CharField(
+        max_length=20,
+        default="Pending"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    razorpay_order_id = models.CharField(
+    max_length=200,
+    null=True,
+    blank=True
+    )
+
+    razorpay_payment_id = models.CharField(
+    max_length=200,
+    null=True,
+    blank=True
+    )
 
 
 class OrderItem(models.Model):
@@ -60,3 +93,5 @@ class OrderItem(models.Model):
 
     def subtotal(self):
         return self.qty*self.price
+    
+    

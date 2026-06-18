@@ -1,57 +1,6 @@
 {% extends 'base.html' %}
-{% load static %}
-
-{% block title %}
-Register
-{% endblock %}
 
 {% block main %}
-
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-
-            <div class="card shadow p-4">
-                <h2 class="text-center mb-4">Register</h2>
-
-                <form method="POST">
-                    {% csrf_token %}
-
-                    <div class="mb-3">
-                        <label>First Name</label>
-                        <input type="text" class="form-control" name="first_name" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label>Last Name</label>
-                        <input type="text" class="form-control" name="last_name" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label>Email</label>
-                        <input type="email" class="form-control" name="email" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label>Username</label>
-                        <input type="text" class="form-control" name="username" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label>Password</label>
-                        <input type="password" class="form-control" name="password" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label>Confirm Password</label>
-                        <input type="password" class="form-control" name="confirm_password" required>
-                    </div>
-
-                    <button type="submit" class="btn btn-success w-100">
-                        Register
-                    </button>
-                </form>
-
 <form action="{% url 'add_address' %}" method="POST" class="billing-form">
         {% csrf_token %}
 
@@ -122,16 +71,4 @@ Register
 
 </div>
 
-
-                <p class="text-center mt-3">
-                    Already have an account?
-                    <a href="{% url 'login' %}">Login</a>
-                </p>
-
-            </div>
-
-        </div>
-    </div>
-</div>
-
-{% endblock %}
+  {%endblock%}
