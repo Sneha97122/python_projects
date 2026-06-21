@@ -32,7 +32,11 @@ urlpatterns=[
     # checkout and order functionality
     path('chekout',checkout,name="checkout"),
     path('add_address',add_address,name="add_address"),
-    path('place_order',place_order,name="place_order")
-    # path('order',order,name="order"),
-    # path('orderitem',orderitem,name="orderitem")
+    path('place_order',place_order,name="place_order"),
+    path('payment_success',payment_success,name="payment_success"),
+    
+
+    # filter by category
+    path('filter_product/id',filter_product,name="filter_product"),
+
 ]

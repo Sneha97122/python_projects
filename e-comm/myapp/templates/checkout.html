@@ -6,7 +6,7 @@
       <div class="container">
         <div class="row no-gutters slider-text align-items-center justify-content-center">
           <div class="col-md-9 ftco-animate text-center">
-          	<p class="breadcrumbs"><span class="mr-2"><a href="{% url  'index' %}">Home</a></span> <span>Checkout</span></p>
+          	<p class="breadcrumbs"><span class="mr-2"><a href="{% url 'index' %}">Home</a></span> <span>Checkout</span></p>
             <h1 class="mb-0 bread">Checkout</h1>
           </div>
         </div>
@@ -27,11 +27,11 @@
 						        <th>Price</th>
 						        <th>Quantity</th>
 						        <th>Total</th>
-								<th>remove to cart</th>
+								<th>Action</th>
 						      </tr>
 						    </thead>
 						    <tbody>
-								{%for c in cart%}
+								{% for c in cart %}
 						      <tr class="text-center">
 						        <td class="product-remove"><a href="#"><span class="ion-ios-close"></span></a></td>
 						        
@@ -39,23 +39,20 @@
 						        
 						        <td class="product-name">
 						        	<h3>{{c.product.name}}</h3>
-						        	<p>{{c.product.des}}</p>
+						        	<p>{{c.product.description}}</p> 
 						        </td>
 						        
-						        <td class="price">{{c.product.price}}</td>
+						        <td class="price">₹{{c.product.price}}</td>
 						        
 						        <td class="quantity">
 						        	<div class="input-group mb-3">
-										
-					             	<input type="text" name="quantity" class="quantity form-control input-number" value="{{c.qty}}" min="1" max="100">
-										
+					             	<input type="text" name="quantity" class="quantity form-control input-number" value="{{c.qty}}" min="1" max="100" readonly>
 					          	</div>
 					          </td>
 						        
-						        <td class="total">{{c.total_price}}</td>
-								<td><a href="{%url 'remove_cart'%}?cid={{c.id}}">remove</a></td>
-						      </tr><!-- END TR-->
-							  	{% endfor %}     
+						        <td class="total">₹{{c.total_price}}</td>
+								<td><a href="{% url 'remove_cart' %}?cid={{c.id}}" class="btn btn-sm btn-danger">Remove</a></td>
+						      </tr>{% endfor %}     
 						    </tbody>
 						  </table>
 					  </div>
@@ -67,7 +64,6 @@
  <div class="container">
     <div class="row">
 
-        <!-- BILLING DETAILS -->
         <div class="col-lg-7">
 
             <form action="{% url 'place_order' %}" method="POST" id="checkout-form">
@@ -80,76 +76,60 @@
                     <div class="border p-3 mb-3">
 
                         <label style="width:100%; cursor:pointer;">
-
                             <input
                                 type="radio"
                                 name="address_id"
                                 value="{{ a.id }}"
                                 {% if forloop.first %}checked{% endif %}
                             >
-
                             <br>
-
-                            <strong>Address:</strong>
-                            {{ a.address }}
-
+                            <strong>Address:</strong> {{ a.address }}
                             <br>
-
-                            <strong>City:</strong>
-                            {{ a.city }}
-
+                            <strong>City:</strong> {{ a.city }}
                             <br>
-
-                            <strong>Pincode:</strong>
-                            {{ a.pincode }}
-
+                            <strong>Pincode:</strong> {{ a.pincode }}
                         </label>
 
                     </div>
                     {% empty %}
                     <div class="alert alert-danger">
-                        No Address Found.
-                        <a href="{% url 'add_address' %}">
-                            Add Address
-                        </a>
+                        No Address Found. <a href="{% url 'add_address' %}">Add Address</a>
                     </div>
                     {% endfor %}
 
                 </div>
-
         </div>
 
-
-        <!-- RIGHT SIDE -->
         <div class="col-lg-5">
 
-            <!-- COUPON -->
-            <div class="cart-detail p-4 mb-4">
+            <div class="cart-total mb-3">
+                <h3>Coupon Code</h3>
+                <p>Enter your coupon code if you have one</p>
 
-                <h3 class="billing-heading mb-4">
-                    Coupon Code
-                </h3>
+                <div class="form-group">
+                    <label>Coupon Code</label>
+                    <input
+                        type="text"
+                        name="code"
+                        class="form-control text-left px-3"
+                        placeholder="Enter Coupon Code"
+                        value="{{ request.POST.code }}"
+                    >
+                </div>
 
-                <input
-                    type="text"
-                    name="coupon"
-                    class="form-control"
-                    placeholder="Enter Coupon Code"
-                >
-
+                {% if error %}
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+                {% endif %}
             </div>
 
-
-            <!-- CART TOTAL -->
             <div class="cart-detail cart-total p-4 mb-4">
-
-                <h3 class="billing-heading mb-4">
-                    Cart Total
-                </h3>
+                <h3 class="billing-heading mb-4">Cart Total</h3>
 
                 <p class="d-flex">
                     <span>Subtotal</span>
-                    <span>₹{{ total }}</span>
+                    <span>₹{{ subtotal|default:total }}</span>
                 </p>
 
                 <p class="d-flex">
@@ -159,7 +139,7 @@
 
                 <p class="d-flex">
                     <span>Discount</span>
-                    <span>₹0</span>
+                    <span>₹{{ discount_amount|default:0 }}</span>
                 </p>
 
                 <hr>
@@ -168,151 +148,81 @@
                     <span>Total</span>
                     <span>₹{{ total }}</span>
                 </p>
-
             </div>
 
-
-            <!-- PAYMENT -->
             <div class="cart-detail p-4">
-
-                <h3 class="billing-heading mb-4">
-                    Payment Method
-                </h3>
+                <h3 class="billing-heading mb-4">Payment Method</h3>
 
                 <div class="form-group">
                     <label>
-                        <input
-                            type="radio"
-                            name="payment_method"
-                            value="COD"
-                            checked
-                        >
+                        <input type="radio" name="payment_method" value="COD" checked>
                         Cash On Delivery
                     </label>
                 </div>
 
 				<div class="form-group">
                     <label>
-                        <input
-                            type="radio"
-                            name="payment_method"
-                            value="ONLINE"
-                        >
-                        pay online
+                        <input type="radio" name="payment_method" value="ONLINE">
+                        Pay Online (Razorpay)
                     </label>
                 </div>
 
                 <div class="form-group">
                     <label>
-                        <input
-                            type="radio"
-                            name="payment_method"
-                            value="BANK"
-                        >
+                        <input type="radio" name="payment_method" value="BANK">
                         Direct Bank Transfer
                     </label>
                 </div>
 
                 <div class="form-group">
                     <label>
-                        <input
-                            type="radio"
-                            name="payment_method"
-                            value="PAYPAL"
-                        >
+                        <input type="radio" name="payment_method" value="PAYPAL">
                         Paypal
                     </label>
                 </div>
 
                 <div class="form-group">
                     <label>
-                        <input
-                            type="checkbox"
-                            required
-                        >
+                        <input type="checkbox" required>
                         I agree to Terms & Conditions
                     </label>
                 </div>
 
-                <button
-                    type="submit"
-                    class="btn btn-primary py-3 px-4 btn-block"
-                >
-                    Place Order
+                <button type="submit" class="btn btn-primary py-3 px-4 btn-block">
+                    Place Order / Apply Coupon
                 </button>
-
             </div>
-
         </div>
-
         </form>
-
     </div>
 </div>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
- <script>
-		$(document).ready(function(){
+{% if razorpay_order %}
+<script>
+var options = {
+    "key": "{{ razorpay_key }}",
+    "amount": "{{ razorpay_order.amount }}",
+    "currency": "INR",
+    "name": "Vegefoods Shop",
+    "description": "Order Purchase Payment",
+    "order_id": "{{ razorpay_order.id }}",
+    "handler": function (response) {
+        alert("Payment Successful!");
+        // Redirects to your success view and passes your Django order ID
+        window.location.href = "{% url 'payment_success' %}?order_id={{ order.id }}";
+    },
+    "theme": {
+        "color": "#82ae46"
+    }
+};
 
-		var quantitiy=0;
-		   $('.quantity-right-plus').click(function(e){
-		        
-		        // Stop acting like a button
-		        e.preventDefault();
-		        // Get the field name
-		        var quantity = parseInt($('#quantity').val());
-		        
-		        // If is not undefined
-		            
-		            $('#quantity').val(quantity + 1);
+var rzp = new Razorpay(options);
+window.onload = function () {
+    rzp.open();
+};
+</script>
+{% endif %}
 
-		          
-		            // Increment
-		        
-		    });
-
-		     $('.quantity-left-minus').click(function(e){
-		        // Stop acting like a button
-		        e.preventDefault();
-		        // Get the field name
-		        var quantity = parseInt($('#quantity').val());
-		        
-		        // If is not undefined
-		      
-		            // Increment
-		            if(quantity>0){
-		            $('#quantity').val(quantity - 1);
-		            }
-		    });
-		    
-		});
-	</script>
-
-    <!-- razorpay sacript -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
-    {% if razorpay_order %}
-    <script>
-        var options={
-            "key":"{{razorpay_key}}",
-            "amount":"{{razorpay_order.amount}}",
-            "currency":"INR",
-            "name":"my shop",
-            "description":"order payment",
-            "order_id":"{{razorpay_order.id}}",
-
-            "handler":function(response){
-                alert("payment successful");
-            }
-        };
-        var rzp=new Razorpay(options);
-        window.onload=function(){
-            rzp.open();
-
-        };
-    </script>
-    {% endif %}
-  </body>
-</html>
-
-{%endblock%}
+{% endblock %}

@@ -73,6 +73,8 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 RAZORPAY_KEY_ID = "rzp_test_T0E2dnUairgxIR"
 RAZORPAY_KEY_SECRET = "37NV2oNnC1rsUrGpOyEvy6vP"
 
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
+
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases

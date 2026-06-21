@@ -1,0 +1,847 @@
+{% extends 'base.html' %}
+
+{% block main %}
+
+    <div class="hero-wrap hero-bread" style="background-image: url('/static/images/bg_1.jpg');">
+      <div class="container">
+        <div class="row no-gutters slider-text align-items-center justify-content-center">
+          <div class="col-md-9 ftco-animate text-center">
+          	<p class="breadcrumbs"><span class="mr-2"><a href="{% url  'index' %}">Home</a></span> <span>Checkout</span></p>
+            <h1 class="mb-0 bread">Checkout</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+
+	<section class="ftco-section ftco-cart">
+			<div class="container">
+				<div class="row">
+    			<div class="col-md-12 ftco-animate">
+    				<div class="cart-list">
+	    				<table class="table">
+						    <thead class="thead-primary">
+						      <tr class="text-center">
+						        <th>&nbsp;</th>
+						        <th>&nbsp;</th>
+						        <th>Product name</th>
+						        <th>Price</th>
+						        <th>Quantity</th>
+						        <th>Total</th>
+								<th>remove to cart</th>
+						      </tr>
+						    </thead>
+						    <tbody>
+								{%for c in cart%}
+						      <tr class="text-center">
+						        <td class="product-remove"><a href="#"><span class="ion-ios-close"></span></a></td>
+						        
+						        <td class="image-prod"><div class="img" style="background-image:url('{{c.product.image.url}}');"></div></td>
+						        
+						        <td class="product-name">
+						        	<h3>{{c.product.name}}</h3>
+						        	<p>{{c.product.des}}</p>
+						        </td>
+						        
+						        <td class="price">{{c.product.price}}</td>
+						        
+						        <td class="quantity">
+						        	<div class="input-group mb-3">
+										
+					             	<input type="text" name="quantity" class="quantity form-control input-number" value="{{c.qty}}" min="1" max="100">
+										
+					          	</div>
+					          </td>
+						        
+						        <td class="total">{{c.total_price}}</td>
+								<td><a href="{%url 'remove_cart'%}?cid={{c.id}}">remove</a></td>
+						      </tr>
+							  	{% endfor %}     
+						    </tbody>
+						  </table>
+					  </div>
+    			</div>
+    		</div>
+			</div>
+		</section>
+   
+ <div class="container">
+    <div class="row">
+
+        <!-- BILLING DETAILS -->
+        <div class="col-lg-7">
+
+            <form action="{% url 'place_order' %}" method="POST" id="checkout-form">
+                {% csrf_token %}
+
+                <div class="cart-detail p-4 mb-4">
+                    <h3 class="billing-heading mb-4">Select Delivery Address</h3>
+
+                    {% for a in address %}
+                    <div class="border p-3 mb-3">
+
+                        <label style="width:100%; cursor:pointer;">
+
+                            <input
+                                type="radio"
+                                name="address_id"
+                                value="{{ a.id }}"
+                                {% if forloop.first %}checked{% endif %}
+                            >
+
+                            <br>
+
+                            <strong>Address:</strong>
+                            {{ a.address }}
+
+                            <br>
+
+                            <strong>City:</strong>
+                            {{ a.city }}
+
+                            <br>
+
+                            <strong>Pincode:</strong>
+                            {{ a.pincode }}
+
+                        </label>
+
+                    </div>
+                    {% empty %}
+                    <div class="alert alert-danger">
+                        No Address Found.
+                        <a href="{% url 'add_address' %}">
+                            Add Address
+                        </a>
+                    </div>
+                    {% endfor %}
+
+                </div>
+
+        </div>
+
+
+        <!-- RIGHT SIDE -->
+        <div class="col-lg-5">
+
+            <!-- COUPON -->
+<div class="cart-total mb-3">
+    <h3>Coupon Code</h3>
+    <p>Enter your coupon code if you have one</p>
+
+    <div class="form-group">
+        <label>Coupon Code</label>
+        <input
+            type="text"
+            name="code"
+            class="form-control text-left px-3"
+            placeholder="Enter Coupon Code"
+        >
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+    {% endif %}
+</div>
+
+            <!-- CART TOTAL -->
+            <div class="cart-detail cart-total p-4 mb-4">
+
+                <h3 class="billing-heading mb-4">
+                    Cart Total
+                </h3>
+
+                <p class="d-flex">
+                    <span>Subtotal</span>
+                    <span>₹{{ total }}</span>
+                </p>
+
+                <p class="d-flex">
+                    <span>Delivery</span>
+                    <span>₹0</span>
+                </p>
+
+                <p class="d-flex">
+                    <span>Discount</span>
+                    <span>{{discount_amount}}</span>
+                </p>
+
+                <hr>
+
+                <p class="d-flex total-price">
+                    <span>Total</span>
+                    <span>₹{{ total }}</span>
+                </p>
+
+            </div>
+
+
+            <!-- PAYMENT -->
+            <div class="cart-detail p-4">
+
+                <h3 class="billing-heading mb-4">
+                    Payment Method
+                </h3>
+
+                <div class="form-group">
+                    <label>
+                        <input
+                            type="radio"
+                            name="payment_method"
+                            value="COD"
+                            checked
+                        >
+                        Cash On Delivery
+                    </label>
+                </div>
+
+				<div class="form-group">
+                    <label>
+                        <input
+                            type="radio"
+                            name="payment_method"
+                            value="ONLINE"
+                        >
+                        pay online
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input
+                            type="radio"
+                            name="payment_method"
+                            value="BANK"
+                        >
+                        Direct Bank Transfer
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input
+                            type="radio"
+                            name="payment_method"
+                            value="PAYPAL"
+                        >
+                        Paypal
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input
+                            type="checkbox"
+                            required
+                        >
+                        I agree to Terms & Conditions
+                    </label>
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary py-3 px-4 btn-block"
+                >
+                    Place Order
+                </button>
+
+            </div>
+
+        </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+ <script>
+		$(document).ready(function(){
+
+		var quantitiy=0;
+		   $('.quantity-right-plus').click(function(e){
+		        
+		        // Stop acting like a button
+		        e.preventDefault();
+		        // Get the field name
+		        var quantity = parseInt($('#quantity').val());
+		        
+		        // If is not undefined
+		            
+		            $('#quantity').val(quantity + 1);
+
+		          
+		            // Increment
+		        
+		    });
+
+		     $('.quantity-left-minus').click(function(e){
+		        // Stop acting like a button
+		        e.preventDefault();
+		        // Get the field name
+		        var quantity = parseInt($('#quantity').val());
+		        
+		        // If is not undefined
+		      
+		            // Increment
+		            if(quantity>0){
+		            $('#quantity').val(quantity - 1);
+		            }
+		    });
+		    
+		});
+	</script>
+
+
+   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+{% if razorpay_order %}
+<script>
+
+console.log("Razorpay Script Loaded");
+
+var options = {
+    "key": "{{ razorpay_key }}",
+    "amount": "{{ razorpay_order.amount }}",
+    "currency": "INR",
+    "name": "My Shop",
+    "description": "Order Payment",
+    "order_id": "{{ razorpay_order.id }}",
+
+    "handler": function (response) {
+
+        alert("Payment Successful");
+
+        console.log(response);
+
+        window.location.href = "/";
+    }
+};
+
+var rzp = new Razorpay(options);
+
+window.onload = function () {
+    rzp.open();
+};
+
+</script>
+{% endif %}
+  </body>
+</html>
+
+{%endblock%}
+
+
+
+
+
+
+
+
+
+
+
+{% extends 'base.html' %}
+
+{%block main%}
+
+    <section id="home-section" class="hero">
+		  <div class="home-slider owl-carousel">
+	      <div class="slider-item" style="background-image: url(/static/images/bg_1.jpg);">
+	      	<div class="overlay"></div>
+	        <div class="container">
+	          <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
+
+	            <div class="col-md-12 ftco-animate text-center">
+	              <h1 class="mb-2">We serve Fresh Vegestables &amp; Fruits</h1>
+	              <h2 class="subheading mb-4">We deliver organic vegetables &amp; fruits</h2>
+	              <p><a href="#" class="btn btn-primary">View Details</a></p>
+	            </div>
+
+	          </div>
+	        </div>
+	      </div>
+
+	      <div class="slider-item" style="background-image: url(/static/images/bg_2.jpg);">
+	      	<div class="overlay"></div>
+	        <div class="container">
+	          <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
+
+	            <div class="col-sm-12 ftco-animate text-center">
+	              <h1 class="mb-2">100% Fresh &amp; Organic Foods</h1>
+	              <h2 class="subheading mb-4">We deliver organic vegetables &amp; fruits</h2>
+	              <p><a href="#" class="btn btn-primary">View Details</a></p>
+	            </div>
+
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+    </section>
+
+    <section class="ftco-section">
+			<div class="container">
+				<div class="row no-gutters ftco-services">
+          <div class="col-md-3 text-center d-flex align-self-stretch ftco-animate">
+            <div class="media block-6 services mb-md-0 mb-4">
+              <div class="icon bg-color-1 active d-flex justify-content-center align-items-center mb-2">
+            		<span class="flaticon-shipped"></span>
+              </div>
+              <div class="media-body">
+                <h3 class="heading">Free Shipping</h3>
+                <span>On order over $100</span>
+              </div>
+            </div>      
+          </div>
+          <div class="col-md-3 text-center d-flex align-self-stretch ftco-animate">
+            <div class="media block-6 services mb-md-0 mb-4">
+              <div class="icon bg-color-2 d-flex justify-content-center align-items-center mb-2">
+            		<span class="flaticon-diet"></span>
+              </div>
+              <div class="media-body">
+                <h3 class="heading">Always Fresh</h3>
+                <span>Product well package</span>
+              </div>
+            </div>    
+          </div>
+          <div class="col-md-3 text-center d-flex align-self-stretch ftco-animate">
+            <div class="media block-6 services mb-md-0 mb-4">
+              <div class="icon bg-color-3 d-flex justify-content-center align-items-center mb-2">
+            		<span class="flaticon-award"></span>
+              </div>
+              <div class="media-body">
+                <h3 class="heading">Superior Quality</h3>
+                <span>Quality Products</span>
+              </div>
+            </div>      
+          </div>
+          <div class="col-md-3 text-center d-flex align-self-stretch ftco-animate">
+            <div class="media block-6 services mb-md-0 mb-4">
+              <div class="icon bg-color-4 d-flex justify-content-center align-items-center mb-2">
+            		<span class="flaticon-customer-service"></span>
+              </div>
+              <div class="media-body">
+                <h3 class="heading">Support</h3>
+                <span>24/7 Support</span>
+              </div>
+            </div>      
+          </div>
+        </div>
+			</div>
+		</section>
+
+
+<section class="ftco-section ftco-category ftco-no-pt">
+    <div class="container">
+        <div class="row">
+            {% for cat in category %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="category-card">
+                    <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+                    <div class="category-overlay">
+                        <h4>{{ cat.name }}</h4>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+    <section class="ftco-section">
+    	<div class="container">
+				<div class="row justify-content-center mb-3 pb-3">
+          <div class="col-md-12 heading-section text-center ftco-animate">
+          	<span class="subheading">Featured Products</span>
+            <h2 class="mb-4">Our Products</h2>
+            <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia</p>
+          </div>
+        </div>   		
+    	</div>
+    	<div class="container">
+    		<div class="row">
+    			<div class="col-md-6 col-lg-3 ftco-animate">
+    				<div class="product">
+    					<a href="#" class="img-prod"><img class="img-fluid" src="/static/images/product-1.jpg" alt="Colorlib Template">
+    						<span class="status">30%</span>
+    						<div class="overlay"></div>
+    					</a>
+    					<div class="text py-3 pb-4 px-3 text-center">
+    						<h3><a href="#">Bell Pepper</a></h3>
+    						<div class="d-flex">
+    							<div class="pricing">
+		    						<p class="price"><span class="mr-2 price-dc">$120.00</span><span class="price-sale">$80.00</span></p>
+		    					</div>
+	    					</div>
+	    					<div class="bottom-area d-flex px-3">
+	    						<div class="m-auto d-flex">
+	    							<a href="{%url 'product_single' %}?pid={{ pro.id }}" class="add-to-cart d-flex justify-content-center align-items-center text-center">
+	    								<span><i class="ion-ios-menu"></i></span>
+	    							</a>
+	    							<a href="#" class="buy-now d-flex justify-content-center align-items-center mx-1">
+	    								<span><i class="ion-ios-cart"></i></span>
+	    							</a>
+	    							<a href="#" class="heart d-flex justify-content-center align-items-center ">
+	    								<span><i class="ion-ios-heart"></i></span>
+	    							</a>
+
+								</div>
+    					</div>
+    				</div>
+    			</div>
+    			<div class="col-md-6 col-lg-3 ftco-animate">
+    				<div class="product">
+    					<a href="#" class="img-prod"><img class="img-fluid" src="/static/images/product-2.jpg" alt="Colorlib Template">
+    						<div class="overlay"></div>
+    					</a>
+    					<div class="text py-3 pb-4 px-3 text-center">
+    						<h3><a href="#">Strawberry</a></h3>
+    						<div class="d-flex">
+    							<div class="pricing">
+		    						<p class="price"><span>$120.00</span></p>
+		    					</div>
+	    					</div>
+    						<div class="bottom-area d-flex px-3">
+	    						<div class="m-auto d-flex">
+	    							<a href="{%url 'product_single' %}?pid={{ pro.id }}" class="add-to-cart d-flex justify-content-center align-items-center text-center">
+	    								<span><i class="ion-ios-menu"></i></span>
+	    							</a>
+	    							<a href="#" class="buy-now d-flex justify-content-center align-items-center mx-1">
+	    								<span><i class="ion-ios-cart"></i></span>
+	    							</a>
+	    							<a href="#" class="heart d-flex justify-content-center align-items-center ">
+	    								<span><i class="ion-ios-heart"></i></span>
+	    							</a>
+    							</div>
+    						</div>
+    					</div>
+    				</div>
+    			</div>
+    			<div class="col-md-6 col-lg-3 ftco-animate">
+    				<div class="product">
+    					<a href="#" class="img-prod"><img class="img-fluid" src="/static/images/product-3.jpg" alt="Colorlib Template">
+	    					<div class="overlay"></div>
+	    				</a>
+    					<div class="text py-3 pb-4 px-3 text-center">
+    						<h3><a href="#">Green Beans</a></h3>
+    						<div class="d-flex">
+    							<div class="pricing">
+		    						<p class="price"><span>$120.00</span></p>
+		    					</div>
+	    					</div>
+    						<div class="bottom-area d-flex px-3">
+	    						<div class="m-auto d-flex">
+	    							<a href="{%url 'product_single' %}?pid={{ pro.id }}" class="add-to-cart d-flex justify-content-center align-items-center text-center">
+	    								<span><i class="ion-ios-menu"></i></span>
+	    							</a>
+	    							<a href="#" class="buy-now d-flex justify-content-center align-items-center mx-1">
+	    								<span><i class="ion-ios-cart"></i></span>
+	    							</a>
+	    							<a href="#" class="heart d-flex justify-content-center align-items-center ">
+	    								<span><i class="ion-ios-heart"></i></span>
+	    							</a>
+    							</div>
+    						</div>
+    					</div>
+    				</div>
+    			</div>
+    			<div class="col-md-6 col-lg-3 ftco-animate">
+    				<div class="product">
+    					<a href="#" class="img-prod"><img class="img-fluid" src="/static/images/product-4.jpg" alt="Colorlib Template">
+    						<div class="overlay"></div>
+    					</a>
+    					<div class="text py-3 pb-4 px-3 text-center">
+    						<h3><a href="#">Purple Cabbage</a></h3>
+    						<div class="d-flex">
+    							<div class="pricing">
+		    						<p class="price"><span>$120.00</span></p>
+		    					</div>
+	    					</div>
+    						<div class="bottom-area d-flex px-3">
+	    						<div class="m-auto d-flex">
+	    							<a href="{%url 'product_single' %}?pid={{ pro.id }}" class="add-to-cart d-flex justify-content-center align-items-center text-center">
+	    								<span><i class="ion-ios-menu"></i></span>
+	    							</a>
+	    							<a href="#" class="buy-now d-flex justify-content-center align-items-center mx-1">
+	    								<span><i class="ion-ios-cart"></i></span>
+	    							</a>
+	    							<a href="#" class="heart d-flex justify-content-center align-items-center ">
+	    								<span><i class="ion-ios-heart"></i></span>
+	    							</a>
+    							</div>
+    						</div>
+    					</div>
+    				</div>
+    			</div>
+
+
+    			<div class="col-md-6 col-lg-3 ftco-animate">
+    				<div class="product">
+    					<a href="#" class="img-prod"><img class="img-fluid" src="/static/images/product-5.jpg" alt="Colorlib Template">
+    						<span class="status">30%</span>
+    						<div class="overlay"></div>
+    					</a>
+    					<div class="text py-3 pb-4 px-3 text-center">
+    						<h3><a href="#">Tomatoe</a></h3>
+    						<div class="d-flex">
+    							<div class="pricing">
+		    						<p class="price"><span class="mr-2 price-dc">$120.00</span><span class="price-sale">$80.00</span></p>
+		    					</div>
+	    					</div>
+	    					<div class="bottom-area d-flex px-3">
+	    						<div class="m-auto d-flex">
+	    							<a href="{%url 'product_single' %}?pid={{ pro.id }}" class="add-to-cart d-flex justify-content-center align-items-center text-center">
+	    								<span><i class="ion-ios-menu"></i></span>
+	    							</a>
+	    							<a href="#" class="buy-now d-flex justify-content-center align-items-center mx-1">
+	    								<span><i class="ion-ios-cart"></i></span>
+	    							</a>
+	    							<a href="#" class="heart d-flex justify-content-center align-items-center ">
+	    								<span><i class="ion-ios-heart"></i></span>
+	    							</a>
+    							</div>
+    						</div>
+    					</div>
+    				</div>
+    			</div>
+    			<div class="col-md-6 col-lg-3 ftco-animate">
+    				<div class="product">
+    					<a href="#" class="img-prod"><img class="img-fluid" src="/static/images/product-6.jpg" alt="Colorlib Template">
+    						<div class="overlay"></div>
+    					</a>
+    					<div class="text py-3 pb-4 px-3 text-center">
+    						<h3><a href="#">Brocolli</a></h3>
+    						<div class="d-flex">
+    							<div class="pricing">
+		    						<p class="price"><span>$120.00</span></p>
+		    					</div>
+	    					</div>
+    						<div class="bottom-area d-flex px-3">
+	    						<div class="m-auto d-flex">
+	    							<a href="{%url 'product_single' %}?pid={{ pro.id }}" class="add-to-cart d-flex justify-content-center align-items-center text-center">
+	    								<span><i class="ion-ios-menu"></i></span>
+	    							</a>
+	    							<a href="#" class="buy-now d-flex justify-content-center align-items-center mx-1">
+	    								<span><i class="ion-ios-cart"></i></span>
+	    							</a>
+	    							<a href="#" class="heart d-flex justify-content-center align-items-center ">
+	    								<span><i class="ion-ios-heart"></i></span>
+	    							</a>
+    							</div>
+    						</div>
+    					</div>
+    				</div>
+    			</div>
+    			<div class="col-md-6 col-lg-3 ftco-animate">
+    				<div class="product">
+    					<a href="#" class="img-prod"><img class="img-fluid" src="/static/images/product-7.jpg" alt="Colorlib Template">
+	    					<div class="overlay"></div>
+	    				</a>
+    					<div class="text py-3 pb-4 px-3 text-center">
+    						<h3><a href="#">Carrots</a></h3>
+    						<div class="d-flex">
+    							<div class="pricing">
+		    						<p class="price"><span>$120.00</span></p>
+		    					</div>
+	    					</div>
+    						<div class="bottom-area d-flex px-3">
+	    						<div class="m-auto d-flex">
+	    							<a href="{%url 'product_single' %}?pid={{ pro.id }}" class="add-to-cart d-flex justify-content-center align-items-center text-center">
+	    								<span><i class="ion-ios-menu"></i></span>
+	    							</a>
+	    							<a href="#" class="buy-now d-flex justify-content-center align-items-center mx-1">
+	    								<span><i class="ion-ios-cart"></i></span>
+	    							</a>
+	    							<a href="#" class="heart d-flex justify-content-center align-items-center ">
+	    								<span><i class="ion-ios-heart"></i></span>
+	    							</a>
+    							</div>
+    						</div>
+    					</div>
+    				</div>
+    			</div>
+    			<div class="col-md-6 col-lg-3 ftco-animate">
+    				<div class="product">
+    					<a href="#" class="img-prod"><img class="img-fluid" src="/static/images/product-8.jpg" alt="Colorlib Template">
+    						<div class="overlay"></div>
+    					</a>
+    					<div class="text py-3 pb-4 px-3 text-center">
+    						<h3><a href="#">Fruit Juice</a></h3>
+    						<div class="d-flex">
+    							<div class="pricing">
+		    						<p class="price"><span>$120.00</span></p>
+		    					</div>
+	    					</div>
+    						<div class="bottom-area d-flex px-3">
+	    						<div class="m-auto d-flex">
+	    							<a href="{%url 'product_single' %}?pid={{ pro.id }}" class="add-to-cart d-flex justify-content-center align-items-center text-center">
+	    								<span><i class="ion-ios-menu"></i></span>
+	    							</a>
+	    							<a href="#" class="buy-now d-flex justify-content-center align-items-center mx-1">
+	    								<span><i class="ion-ios-cart"></i></span>
+	    							</a>
+	    							<a href="#" class="heart d-flex justify-content-center align-items-center ">
+	    								<span><i class="ion-ios-heart"></i></span>
+	    							</a>
+    							</div>
+    						</div>
+    					</div>
+    				</div>
+    			</div>
+    		</div>
+    	</div>
+    </section>
+		
+		<section class="ftco-section img" style="background-image: url(/static/images/bg_3.jpg);">
+    	<div class="container">
+				<div class="row justify-content-end">
+          <div class="col-md-6 heading-section ftco-animate deal-of-the-day ftco-animate">
+          	<span class="subheading">Best Price For You</span>
+            <h2 class="mb-4">Deal of the day</h2>
+            <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia</p>
+            <h3><a href="#">Spinach</a></h3>
+            <span class="price">$10 <a href="#">now $5 only</a></span>
+            <div id="timer" class="d-flex mt-5">
+						  <div class="time" id="days"></div>
+						  <div class="time pl-3" id="hours"></div>
+						  <div class="time pl-3" id="minutes"></div>
+						  <div class="time pl-3" id="seconds"></div>
+						</div>
+          </div>
+        </div>   		
+    	</div>
+    </section>
+
+    <section class="ftco-section testimony-section">
+      <div class="container">
+        <div class="row justify-content-center mb-5 pb-3">
+          <div class="col-md-7 heading-section ftco-animate text-center">
+          	<span class="subheading">Testimony</span>
+            <h2 class="mb-4">Our satisfied customer says</h2>
+            <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in</p>
+          </div>
+        </div>
+        <div class="row ftco-animate">
+          <div class="col-md-12">
+            <div class="carousel-testimony owl-carousel">
+              <div class="item">
+                <div class="testimony-wrap p-4 pb-5">
+                  <div class="user-img mb-5" style="background-image: url(/static/images/person_1.jpg)">
+                    <span class="quote d-flex align-items-center justify-content-center">
+                      <i class="icon-quote-left"></i>
+                    </span>
+                  </div>
+                  <div class="text text-center">
+                    <p class="mb-5 pl-4 line">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+                    <p class="name">Garreth Smith</p>
+                    <span class="position">Marketing Manager</span>
+                  </div>
+                </div>
+              </div>
+              <div class="item">
+                <div class="testimony-wrap p-4 pb-5">
+                  <div class="user-img mb-5" style="background-image: url(/static/images/person_2.jpg)">
+                    <span class="quote d-flex align-items-center justify-content-center">
+                      <i class="icon-quote-left"></i>
+                    </span>
+                  </div>
+                  <div class="text text-center">
+                    <p class="mb-5 pl-4 line">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+                    <p class="name">Garreth Smith</p>
+                    <span class="position">Interface Designer</span>
+                  </div>
+                </div>
+              </div>
+              <div class="item">
+                <div class="testimony-wrap p-4 pb-5">
+                  <div class="user-img mb-5" style="background-image: url(/static/images/person_3.jpg)">
+                    <span class="quote d-flex align-items-center justify-content-center">
+                      <i class="icon-quote-left"></i>
+                    </span>
+                  </div>
+                  <div class="text text-center">
+                    <p class="mb-5 pl-4 line">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+                    <p class="name">Garreth Smith</p>
+                    <span class="position">UI Designer</span>
+                  </div>
+                </div>
+              </div>
+              <div class="item">
+                <div class="testimony-wrap p-4 pb-5">
+                  <div class="user-img mb-5" style="background-image: url(/static/images/person_1.jpg)">
+                    <span class="quote d-flex align-items-center justify-content-center">
+                      <i class="icon-quote-left"></i>
+                    </span>
+                  </div>
+                  <div class="text text-center">
+                    <p class="mb-5 pl-4 line">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+                    <p class="name">Garreth Smith</p>
+                    <span class="position">Web Developer</span>
+                  </div>
+                </div>
+              </div>
+              <div class="item">
+                <div class="testimony-wrap p-4 pb-5">
+                  <div class="user-img mb-5" style="background-image: url(/static/images/person_1.jpg)">
+                    <span class="quote d-flex align-items-center justify-content-center">
+                      <i class="icon-quote-left"></i>
+                    </span>
+                  </div>
+                  <div class="text text-center">
+                    <p class="mb-5 pl-4 line">Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+                    <p class="name">Garreth Smith</p>
+                    <span class="position">System Analyst</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr>
+
+		<section class="ftco-section ftco-partner">
+    	<div class="container">
+    		<div class="row">
+    			<div class="col-sm ftco-animate">
+    				<a href="#" class="partner"><img src="/static/images/partner-1.png" class="img-fluid" alt="Colorlib Template"></a>
+    			</div>
+    			<div class="col-sm ftco-animate">
+    				<a href="#" class="partner"><img src="/static/images/partner-2.png" class="img-fluid" alt="Colorlib Template"></a>
+    			</div>
+    			<div class="col-sm ftco-animate">
+    				<a href="#" class="partner"><img src="/static/images/partner-3.png" class="img-fluid" alt="Colorlib Template"></a>
+    			</div>
+    			<div class="col-sm ftco-animate">
+    				<a href="#" class="partner"><img src="/static/images/partner-4.png" class="img-fluid" alt="Colorlib Template"></a>
+    			</div>
+    			<div class="col-sm ftco-animate">
+    				<a href="#" class="partner"><img src="/static/images/partner-5.png" class="img-fluid" alt="Colorlib Template"></a>
+    			</div>
+    		</div>
+    	</div>
+    </section>
+
+		<section class="ftco-section ftco-no-pt ftco-no-pb py-5 bg-light">
+      <div class="container py-4">
+        <div class="row d-flex justify-content-center py-5">
+          <div class="col-md-6">
+          	<h2 style="font-size: 22px;" class="mb-0">Subcribe to our Newsletter</h2>
+          	<span>Get e-mail updates about our latest shops and special offers</span>
+          </div>
+          <div class="col-md-6 d-flex align-items-center">
+            <form action="#" class="subscribe-form">
+              <div class="form-group d-flex">
+                <input type="text" class="form-control" placeholder="Enter email address">
+                <input type="submit" value="Subscribe" class="submit px-3">
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+   {%endblock%}

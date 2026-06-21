@@ -52,77 +52,7 @@ Register
                     </button>
                 </form>
 
-<form action="{% url 'add_address' %}" method="POST" class="billing-form">
-        {% csrf_token %}
-
-        <h3 class="mb-4 billing-heading">Billing Details</h3>
-
-        <div class="row align-items-end">
-
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label>Street Address</label>
-                    <input
-                        type="text"
-                        name="address"
-                        class="form-control"
-                        placeholder="House Number and Street Name"
-                        required
-                    >
                 </div>
-            </div>
-
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label>Apartment / Suite (Optional)</label>
-                    <input
-                        type="text"
-                        name="apartment"
-                        class="form-control"
-                        placeholder="Apartment, Suite, Unit etc."
-                    >
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label>Town / City</label>
-                    <input
-                        type="text"
-                        name="city"
-                        class="form-control"
-                        placeholder="Enter City"
-                        required
-                    >
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label>Pincode</label>
-                    <input
-                        type="number"
-                        name="pincode"
-                        class="form-control"
-                        placeholder="Enter Pincode"
-                        required
-                    >
-                </div>
-            </div>
-
-            <div class="col-md-12 mt-3">
-                <button type="submit" class="btn btn-primary py-3 px-5">
-                    Save Address
-                </button>
-            </div>
-
-        </div>
-
-    </form>
-
-</div>
-
-
                 <p class="text-center mt-3">
                     Already have an account?
                     <a href="{% url 'login' %}">Login</a>

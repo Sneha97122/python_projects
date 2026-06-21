@@ -12,7 +12,10 @@ import razorpay
 
 def index(request):
     category=Category.objects.all()
-    return render(request,"index.html",{"category":category})
+    product=Product.objects.all()
+    feature_product=Product.objects.filter(is_featured=True)
+    deal_product=Product.objects.filter(is_deal=True).first()
+    return render(request,"index.html",{"category":category,"product":product,"feature_product":feature_product,"deal_product":deal_product})
 
 
 def about(request):
@@ -61,7 +64,8 @@ def product_single(request):
 
 def shop(request):
     productes=Product.objects.all()
-    return render(request,"shop.html",{"productes":productes})
+    category=Category.objects.all()
+    return render(request,"shop.html",{"productes":productes,"category":category})
 
 
 
@@ -196,8 +200,10 @@ def add_address(request):
         Address.objects.create(
             user=request.user,address=address,city=city,pincode=pincode
         )
-        return render(request,"add_address.html",{"address":address})
-    return redirect('checkout')
+        return redirect('checkout')
+
+    return render(request,"add_address.html")
+    
 
 
 # checkout functionality
@@ -212,59 +218,251 @@ def checkout(request):
 
     
 
-def place_order(request):
-    if request.method =='POST':
-        address_id=request.POST.get("address_id")
-        payment_method=request.POST.get("payment_method")
-        cart=Cart.objects.filter(user=request.user)
+# def place_order(request):
 
-        total=0
-        for c in cart:
-            total+=c.total_price()
-        address=Address.objects.get(
-            id=address_id,
-            user=request.user
+#     if request.method == "POST":
+#         address_id = request.POST.get("address_id")
+#         payment_method = request.POST.get("payment_method")
+#         coupon_code = request.POST.get("code")
+
+#         cart = Cart.objects.filter(user=request.user)
+
+#         # Calculate Cart Total
+#         total = 0
+
+#         for c in cart:
+#             total += c.total_price()
+
+#         # Apply Coupon
+#         discount_amount=0
+#         if coupon_code:
+#             try:
+#                 coupon = Coupon.objects.get(
+#                     code=coupon_code.upper()
+#                 )
+
+#                 discount_amount = (
+#                     total * coupon.discount
+#                 ) / 100
+
+#                 total = total - discount_amount
+
+#             except Coupon.DoesNotExist:
+
+#                 address = Address.objects.filter(
+#                     user=request.user
+#                 )
+
+#                 return render(
+#                     request,
+#                     "checkout.html",
+#                     {
+#                         "cart": cart,
+#                         "address": address,
+#                         "total": total,
+#                         "error": "Invalid Coupon Code",
+#                         "discount ":discount_amount
+#                     }
+#                 )
+
+#         # Selected Address
+#         address = Address.objects.get(
+#             id=address_id,
+#             user=request.user
+#         )
+
+#         # Create Order
+#         order = Order.objects.create(
+#             user=request.user,
+#             address=address,
+#             total_amount=total,
+#             payment_method=payment_method
+#         )
+
+#         # Create Order Items
+#         for c in cart:
+
+#             OrderItem.objects.create(
+#                 order=order,
+#                 product=c.product,
+#                 qty=c.qty,
+#                 price=c.product.price
+#             )
+
+#         # COD
+#         if payment_method == "COD":
+
+#             cart.delete()
+
+#             return redirect("index")
+
+#         # ONLINE PAYMENT
+#         elif payment_method in [
+#             "ONLINE",
+#             "BANK",
+#             "PAYPAL",
+#             "RAZORPAY"
+#         ]:
+
+#             client = razorpay.Client(
+#                 auth=(
+#                     settings.RAZORPAY_KEY_ID,
+#                     settings.RAZORPAY_KEY_SECRET
+#                 )
+#             )
+
+#             razorpay_order = client.order.create({
+#                 "amount": int(total * 100),
+#                 "currency": "INR"
+#             })
+
+#             order.razorpay_order_id = razorpay_order["id"]
+#             order.save()
+
+#             address = Address.objects.filter(
+#                 user=request.user
+#             )
+
+#             return render(
+#                 request,
+#                 "checkout.html",
+#                 {
+#                     "cart": cart,
+#                     "address": address,
+#                     "total": total,
+#                     "order": order,
+#                     "razorpay_order": razorpay_order,
+#                     "razorpay_key": settings.RAZORPAY_KEY_ID
+#                 }
+#             )
+
+#     return redirect("checkout")
+
+
+from django.shortcuts import render, redirect
+from django.conf import settings
+from .models import Cart, Address, Order, OrderItem, Coupon
+import razorpay
+
+def place_order(request):
+    if request.method == "POST":
+        address_id = request.POST.get("address_id")
+        payment_method = request.POST.get("payment_method")
+        coupon_code = request.POST.get("code")  
+
+        cart = Cart.objects.filter(user=request.user)
+        addresses = Address.objects.filter(user=request.user)
+
+        subtotal = sum(c.total_price() for c in cart)
+        total = subtotal
+
+        discount_amount = 0
+        applied_coupon = None
+        
+        if coupon_code:
+            try:
+                coupon = Coupon.objects.get(code=coupon_code.upper(), active=True)
+                discount_amount = (subtotal * coupon.discount) / 100
+                total = subtotal - discount_amount
+                applied_coupon = coupon.code
+            except Coupon.DoesNotExist:
+                return render(request, "checkout.html", {
+                    "cart": cart,
+                    "address": addresses,
+                    "total": subtotal,
+                    "error": "Invalid or Expired Coupon Code",
+                    "discount_amount": 0
+                })
+
+        try:
+            selected_address = Address.objects.get(id=address_id, user=request.user)
+        except (Address.DoesNotExist, ValueError):
+            return render(request, "checkout.html", {
+                "cart": cart,
+                "address": addresses,
+                "total": total,
+                "error": "Please select a valid delivery address.",
+                "discount_amount": discount_amount
+            })
+
+        order = Order.objects.create(
+            user=request.user,
+            address=selected_address,
+            total_amount=total,
+            payment_method=payment_method,
+            coupon_code=applied_coupon,
+            payment_status="Pending",
+            status="Pending"
         )
 
-        order=Order.objects.create(
-            user=request.user,
-            address=address,
-            total_amount=total,
-            payment_method=payment_method)
-        
         for c in cart:
             OrderItem.objects.create(
                 order=order,
                 product=c.product,
                 qty=c.qty,
-                price=c.product.price
+                price=c.product.price  
             )
 
-        if payment_method == 'COD':
-            cart.delete()
+        if payment_method == "COD":
+            cart.delete()  
+            return redirect("index")
 
-            return redirect('index')
-        
-        elif payment_method in ['ONLINE' , 'BANK' , 'PAYPAL' , 'RAZORPAY']:
-            
-
-            client=razorpay.Client(
-                auth=(
-                    settings.RAZORPAY_KEY_ID,
-                    settings.RAZORPAY_KEY_SECRET
-                )
+        elif payment_method in ["ONLINE", "BANK", "PAYPAL", "RAZORPAY"]:
+            client = razorpay.Client(
+                auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET)
             )
 
-            razorpay_order=client.order.create({
-                "amount":int(total*100),
-                "currency":"INR"
+            razorpay_order = client.order.create({
+                "amount": int(total * 100),  
+                "currency": "INR"
             })
 
-            order.razorpay_order_id=razorpay_order['id']
+            order.razorpay_order_id = razorpay_order["id"]
             order.save()
 
-            return render(request,"checkout.html",{"order":order,"razorpay_order":razorpay_order,"razorpay_key":settings.RAZORPAY_KEY_ID})
+            return render(request, "checkout.html", {
+                "cart": cart,
+                "address": addresses,
+                "subtotal": subtotal,  
+                "total": total,        
+                "order": order,
+                "razorpay_order": razorpay_order,
+                "razorpay_key": settings.RAZORPAY_KEY_ID,
+                "discount_amount": discount_amount
+            })
 
-        
     return redirect("checkout")
 
+
+
+def payment_success(request):
+    order_id = request.GET.get('order_id')
+    if order_id:
+        try:
+            order = Order.objects.get(id=order_id, user=request.user)
+            order.payment_status = "Paid"
+            order.status = "Accepted"
+            order.save()
+        except Order.DoesNotExist:
+            pass
+            
+   
+    Cart.objects.filter(user=request.user).delete()
+    
+    return redirect("index")
+
+
+
+# filter the product by category
+
+def filter_product(request):
+    cid=request.GET.get('cid')
+    
+    if cid:
+        productes=Product.objects.filter(category_id=cid)
+
+    else:
+        productes=Product.objects.all()
+    category=Category.objects.all()
+
+    return render(request,"shop.html",{"productes":productes,"category":category})

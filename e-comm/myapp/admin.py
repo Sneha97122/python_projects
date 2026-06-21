@@ -14,6 +14,8 @@ admin.site.register(Wishlist)
 
 admin.site.register(Address)
 
+admin.site.register(Coupon)
+
 
 
 class orderadmin(admin.ModelAdmin):
