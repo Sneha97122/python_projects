@@ -2,7 +2,7 @@
 
 {% block main %}
 
-    <div class="hero-wrap hero-bread" style="background-image: url('/static/images/bg_1.jpg');">
+    <div class="hero-wrap hero-bread" style="background-image: url('/static/images/cart.jpg');">
       <div class="container">
         <div class="row no-gutters slider-text align-items-center justify-content-center">
           <div class="col-md-9 ftco-animate text-center">
@@ -22,10 +22,11 @@
 						    <thead class="thead-primary">
 						      <tr class="text-center">
 						        <th>&nbsp;</th>
-						        <th>&nbsp;</th>
+								<th>&nbsp;</th>
 						        <th>Product name</th>
 						        <th>Price</th>
 						        <th>Quantity</th>
+								<th>unit</th>
 						        <th>Total</th>
 								<th>remove to cart</th>
 						      </tr>
@@ -46,11 +47,12 @@
 						        
 						        <td class="quantity">
 						        	<div class="input-group mb-3">
-										<a href="{% url 'increment'%}?cid={{c.id}}">+</a>
-					             	<input type="text" name="quantity" class="quantity form-control input-number" value="{{c.qty}}" min="1" max="100">
 										<a href="{% url 'decrement'%}?cid={{c.id}}">-</a>
+					             	<input type="text" name="quantity" class="quantity form-control input-number" value="{{c.qty}}" min="1" max="100">
+										<a href="{% url 'increment'%}?cid={{c.id}}">+</a>
 					          	</div>
 					          </td>
+							  <td>{{c.product.unit}}</td>
 						        
 						        <td class="total">{{c.total_price}}</td>
 								<td><a href="{%url 'remove_cart'%}?cid={{c.id}}">remove</a></td>

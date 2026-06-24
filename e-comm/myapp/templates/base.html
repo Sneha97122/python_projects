@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Amatic+SC:400,700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <link rel="stylesheet" href="/static/css/open-iconic-bootstrap.min.css">
     <link rel="stylesheet" href="/static/css/animate.css">
@@ -93,6 +94,7 @@
 	  </nav>
     <!-- END nav -->
 
+
     {% block main %}
 
 
@@ -111,7 +113,7 @@
           <div class="col-md">
             <div class="ftco-footer-widget mb-4">
               <h2 class="ftco-heading-2">Vegefoods</h2>
-              <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia.</p>
+              <p>"Bringing the Taste of Nature to Your Doorstep."</p>
               <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
                 <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
                 <li class="ftco-animate"><a href="#"><span class="icon-facebook"></span></a></li>
@@ -123,10 +125,10 @@
             <div class="ftco-footer-widget mb-4 ml-md-5">
               <h2 class="ftco-heading-2">Menu</h2>
               <ul class="list-unstyled">
-                <li><a href="#" class="py-2 d-block">Shop</a></li>
-                <li><a href="#" class="py-2 d-block">About</a></li>
-                <li><a href="#" class="py-2 d-block">Journal</a></li>
-                <li><a href="#" class="py-2 d-block">Contact Us</a></li>
+                <li><a href="{%url 'shop'%}" class="py-2 d-block">Shop</a></li>
+                <li><a href="{%url 'about'%}" class="py-2 d-block">About</a></li>
+                <li><a href="{%url 'about'%}" class="py-2 d-block">Journal</a></li>
+                <li><a href="{%url 'contact'%}" class="py-2 d-block">Contact Us</a></li>
               </ul>
             </div>
           </div>
@@ -152,22 +154,15 @@
             	<h2 class="ftco-heading-2">Have a Questions?</h2>
             	<div class="block-23 mb-3">
 	              <ul>
-	                <li><span class="icon icon-map-marker"></span><span class="text">203 Fake St. Mountain View, San Francisco, California, USA</span></li>
-	                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+2 392 3929 210</span></a></li>
-	                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">info@yourdomain.com</span></a></li>
+	                <li><span class="icon icon-map-marker"></span><span class="text">305,tops carear center,ring rode surat,gujrat</span></li>
+	                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+91 97122 29128</span></a></li>
+	                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">vegfood@gmail.com</span></a></li>
 	              </ul>
 	            </div>
             </div>
           </div>
         </div>
         <div class="row">
-          <div class="col-md-12 text-center">
-
-            <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-						  Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart color-danger" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-						  <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-						</p>
-          </div>
         </div>
       </div>
     </footer>
@@ -194,6 +189,48 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
   <script src="/static/js/google-map.js"></script>
   <script src="/static/js/main.js"></script>
+
+  <div id="chat-btn">  💬</div>
+  <div id="chat-box">
+    <div class="chat-header">
+      <span>vegfood Assistant</span>
+      <span id="close-chat">✖</span>
+    </div>
+    <div class="chat-body">
+      <div class="bot-message">Welcome to Vegfood!</div>
+
+      <div class="bot-message">How can i help you today?
+      </div>
+      <div class="quick-actions">
+        <button>🔥 Deals</button>
+            <button>🥭 Best Seller</button>
+            <button>🥬 Vegetables</button>
+            <button>🍎 Fruits</button>
+      </div>
+    </div>
+
+    <div class="chat-footer">
+      <input type="text" placeholder="Ask Something...">
+      <button>➤</button>
+    </div>
+  </div>
     
   </body>
+  <script>
+  document.addEventListener("DOMContentLoaded",function(){
+
+    
+    const chatBtn=document.getElementById("chat-btn");
+    const chatBox=document.getElementById("chat-box");
+    const closeChat=document.getElementById("close-chat");
+
+    chatBtn.onclick = function(){
+      chatBox.style.display="block";
+    };
+
+    closeChat.onclick= function(){
+      chatBox.style.display="none";
+    };
+  });
+  </script>
 </html>

@@ -4,7 +4,7 @@
 
     <section id="home-section" class="hero">
         <div class="home-slider owl-carousel">
-            <div class="slider-item" style="background-image: url(/static/images/bg_1.jpg);">
+            <div class="slider-item" style="background-image: url(/static/images/home.jpg);">
                 <div class="overlay"></div>
                 <div class="container">
                     <div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
@@ -204,29 +204,12 @@
                         </span>
                     </h4>
 
-                    <div id="timer" class="d-flex mt-4">
-
-                        <div class="border rounded p-3 mr-2 text-center">
-                            <h4 id="days"></h4>
-                            <small>Days</small>
-                        </div>
-
-                        <div class="border rounded p-3 mr-2 text-center">
-                            <h4 id="hours"></h4>
-                            <small>Hours</small>
-                        </div>
-
-                        <div class="border rounded p-3 mr-2 text-center">
-                            <h4 id="minutes"></h4>
-                            <small>Minutes</small>
-                        </div>
-
-                        <div class="border rounded p-3 text-center">
-                            <h4 id="seconds"></h4>
-                            <small>Seconds</small>
-                        </div>
-
-                    </div>
+                    <div id="timer" class="d-flex mt-5">
+    <div class="time" id="days"></div>
+    <div class="time pl-3" id="hours"></div>
+    <div class="time pl-3" id="minutes"></div>
+    <div class="time pl-3" id="seconds"></div>
+</div>
 
                     <div class="mt-4">
 
@@ -384,11 +367,69 @@
         </div>
     </section>
 
+    <script>
+
+const dealEnd = new Date(
+    "{{ deal_product.deal_end|date:'Y-m-d H:i:s' }}"
+).getTime();
+
+setInterval(function(){
+
+    const now = new Date().getTime();
+
+    const distance = dealEnd - now;
+
+    if(distance <= 0){
+        document.getElementById("days").innerHTML = "0<br>Days";
+        document.getElementById("hours").innerHTML = "0<br>Hours";
+        document.getElementById("minutes").innerHTML = "0<br>Minutes";
+        document.getElementById("seconds").innerHTML = "0<br>Seconds";
+        return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+
+    const hours = Math.floor(
+        (distance % (1000 * 60 * 60 * 24))
+        / (1000 * 60 * 60)
+    );
+
+    const minutes = Math.floor(
+        (distance % (1000 * 60 * 60))
+        / (1000 * 60)
+    );
+
+    const seconds = Math.floor(
+        (distance % (1000 * 60))
+        / 1000
+    );
+
+    document.getElementById("days").innerHTML =
+        days +'<h6>days</h6>';
+
+    document.getElementById("hours").innerHTML =
+        hours +'<h6>hours</h6>' ;
+
+    document.getElementById("minutes").innerHTML =
+        minutes +'<h6>minutes</h6>';
+
+    document.getElementById("seconds").innerHTML =
+        seconds+'<h6>seconds</h6>';
+
+},1000);
+
+</script>
+
+{% if login %}
+<script>
+    Swal.fire({
+        icon:"welcom",
+        title:"welcome home",
+        text:"welcome to the vegfood {{user.name}}",
+        confirmButtonText:"ok"
+    })
+</script>
+{%endif%}
+
 {% endblock %}
 
-<script>
-    var deal_end= new Date(
-        "{{deal_product.deal_end:'M d,Y H:i:s'}}"
-    ).getTime();
-    console.log(deal_end);
-</script>

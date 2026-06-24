@@ -4,9 +4,6 @@ from myapp.views import *
 urlpatterns=[
     path('',index,name="index"),
     path('about',about,name="about"),
-    path('blog-single',blog_single,name="blog_single"),
-    path('blog',blog,name="blog"),
-    path('contact',contact,name="contact"),
     path('product-single',product_single,name="product_single"),
     path('shop',shop,name="shop"),
     
@@ -38,5 +35,16 @@ urlpatterns=[
 
     # filter by category
     path('filter_product/id',filter_product,name="filter_product"),
+
+
+    # add blog section
+    path('blog_single/id',blog_single,name="blog_single"),
+    path('blog',blog,name="blog"),
+
+    # add contect us
+    path('contact',contact,name="contact"),
+
+    # add cheatbox 
+    path('chatbot/',chatbot,name="chatbot")
 
 ]

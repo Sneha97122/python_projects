@@ -16,6 +16,12 @@ admin.site.register(Address)
 
 admin.site.register(Coupon)
 
+admin.site.register(Blog)
+
+admin.site.register(Comment)
+
+admin.site.register(Contect_us)
+
 
 
 class orderadmin(admin.ModelAdmin):
