@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect,get_object_or_404
+from django.shortcuts import render,redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 from myapp.models import *
@@ -9,15 +9,67 @@ import razorpay
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
+from django.db.models import Sum
+from django.core.mail import send_mail
+
+
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
+from django.utils import timezone
+
+
+# for profile creation
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your views here.
+
+def profile_create(request):
+    profile, created = Profile.objects.get_or_create(
+        user=request.user
+    )
+    return render(request,"profile.html",{"profile":profile})
+
+
+def edit_profile(request):
+
+    profile, created = Profile.objects.get_or_create(
+        user=request.user
+    )
+
+    if request.method == "POST":
+
+        request.user.first_name = request.POST.get("first_name")
+        request.user.last_name = request.POST.get("last_name")
+        request.user.email = request.POST.get("email")
+
+        profile.phone = request.POST.get("phone")
+        profile.city = request.POST.get("city")
+        profile.bio = request.POST.get("bio")
+
+        if request.FILES.get("profile_image"):
+            profile.profile_image = request.FILES.get("profile_image")
+
+        request.user.save()
+        profile.save()
+
+        return redirect("profile_create")
+
+    return render(
+        request,
+        "edit_profile.html",
+        {"profile": profile}
+    )
 
 
 def index(request):
     category=Category.objects.all()
     product=Product.objects.all()
     feature_product=Product.objects.filter(is_featured=True)
-    deal_product=Product.objects.filter(is_deal=True).first()
+    deal_product=Product.objects.filter(
+    is_deal=True,
+    deal_end__t=timezone.now()
+).update(is_deal=False)
     return render(request,"index.html",{"category":category,"product":product,"feature_product":feature_product,"deal_product":deal_product})
 
 
@@ -74,18 +126,26 @@ def shop(request):
 
 def register_page(request):
     if request.method == "POST":
+        profile_image=request.FILES.get('profile_image')
         first_name = request.POST.get("first_name")
         last_name = request.POST.get("last_name")
         email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        city = request.POST.get("city")
+        bio = request.POST.get("bio")
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        User.objects.create_user(
+        user=User.objects.create_user(
             first_name = first_name,
             last_name = last_name,
             email = email,
             username = username,
             password = password,
+        )
+
+        Profile.objects.create(
+            user=user,profile_image=profile_image,phone=phone,city=city,bio=bio
         )
         return redirect("login")
     
@@ -309,21 +369,63 @@ def place_order(request):
     return redirect("checkout")
 
 
-
 def payment_success(request):
     order_id = request.GET.get('order_id')
+
     if order_id:
         try:
-            order = Order.objects.get(id=order_id, user=request.user)
+            order = Order.objects.get(
+                id=order_id,
+                user=request.user
+            )
+
+            # Update Order Status
             order.payment_status = "Paid"
             order.status = "Accepted"
             order.save()
+
+            # Get Order Items
+            items = OrderItem.objects.filter(order=order)
+
+            product_list = ""
+
+            for item in items:
+                product_list += (
+                    f"{item.product.name} x {item.qty} = ₹{item.subtotal()}\n"
+                )
+
+            items = OrderItem.objects.filter(order=order)
+
+            html_content = render_to_string(
+                "email/order_confirmation.html",
+                {
+                    "username": order.user.username,
+                    "order_id": order.id,
+                    "items": items,
+                    "total_amount": order.total_amount,
+                }
+            )
+
+            email = EmailMultiAlternatives(
+                subject="Vegfood Order Confirmation",
+                body="Your order has been placed successfully.",
+                from_email=settings.EMAIL_HOST_USER,
+                to=[order.user.email]
+            )
+
+            email.attach_alternative(
+                html_content,
+                "text/html"
+            )
+
+            email.send()
+
         except Order.DoesNotExist:
             pass
-            
-   
+
+    # Clear Cart
     Cart.objects.filter(user=request.user).delete()
-    
+
     return redirect("index")
 
 
@@ -439,14 +541,45 @@ def chatbot(request):
         is_deal=True
     )
 
-    text = "🔥 Today's Deals\n\n"
+        text = "🔥 Today's Deals\n\n"
 
-    for d in deals:
-        text += f"{d.name} ₹{d.deal_price}\n"
+        for d in deals:
+            text += f"{d.name} ₹{d.deal_price}\n"
 
-        return JsonResponse({
+            return JsonResponse({
         "answer": text
     })
+        
+    if "fruit" in message:
+        return JsonResponse({
+            "answer":"we have apple,mangos,graphs,oranges and more"
+        })
+    
+    if "vegetables" in message:
+        return JsonResponse({
+            "answer":"we have tometo,potato,onion,spinach and more"
+        })
+    
+    if "best seller" in message or "popular" in message:
+
+        best=(
+            OrderItem.objects.values('product__name')
+            .annotate(total_sold=Sum('qty'))
+            .order_by('total_sold')
+            .first()
+        )
+
+        if best:
+            return JsonResponse({
+                "answer":"best seller product:\n\n{best['product__name']}\nSold: {best['total_sold]} times"
+            })
+        
+        return JsonResponse({
+        "answer": "No sales data available yet."
+    
+            })
+    
+    
 
     # product search
     product=Product.objects.filter(
@@ -454,15 +587,25 @@ def chatbot(request):
     ).first()
 
     if product:
-        answer=f"""
-        {product.name}
-        price:{product.price}
-        stock:{product.quntity}
-        Category:{product.category.name}
-        """
+        answer = f"""
+🛒 Product: {product.name}
+
+💰 Price: ₹{product.price}
+
+📦 Stock: {product.quntity}
+
+📂 Category: {product.category.name}
+"""
         return JsonResponse({"answer":answer})
 
     return JsonResponse({
         "answer":"Sorry, I could not find that product"
     })
+
+
+
+def deal(request):
+    deals=Product.objects.filter(is_deal=True)
+    return render(request,"index.html")
+
 

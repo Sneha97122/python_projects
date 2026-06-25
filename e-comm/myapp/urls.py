@@ -2,6 +2,11 @@ from django.urls import *
 from myapp.views import *
 
 urlpatterns=[
+    # profile creation url
+    path('profile_create',profile_create,name="profile_create"),
+    path('edit_profile',edit_profile,name="edit_profile"),
+
+
     path('',index,name="index"),
     path('about',about,name="about"),
     path('product-single',product_single,name="product_single"),
@@ -45,6 +50,9 @@ urlpatterns=[
     path('contact',contact,name="contact"),
 
     # add cheatbox 
-    path('chatbot/',chatbot,name="chatbot")
+    path('chatbot/',chatbot,name="chatbot"),
+
+    # deal of the day
+    path('deal',deal,name="deal"),
 
 ]

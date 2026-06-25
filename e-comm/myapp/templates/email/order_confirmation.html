@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Order Confirmation</title>
+</head>
+
+<body style="font-family: Arial, sans-serif; background:#f5f5f5; padding:20px;">
+
+```
+<div style="max-width:700px; margin:auto; background:white; border-radius:10px; overflow:hidden;">
+
+    <div style="background:#82ae46; color:white; padding:25px; text-align:center;">
+        <h1>🥬 VEGFOOD</h1>
+        <p>Fresh Fruits & Vegetables Delivered To Your Doorstep</p>
+    </div>
+
+    <div style="padding:30px;">
+
+        <h2>Hello {{ username }},</h2>
+
+        <p>
+            Thank you for shopping with Vegfood ❤️
+        </p>
+
+        <p>
+            Your order has been placed successfully.
+        </p>
+
+        <hr>
+
+        <h3>Order Information</h3>
+
+        <p>
+            <strong>Order ID:</strong>
+            #{{ order_id }}
+        </p>
+
+        <p>
+            <strong>Payment Status:</strong>
+            <span style="color:green;">
+                Paid
+            </span>
+        </p>
+
+        <hr>
+
+        <h3>Products Ordered</h3>
+
+        <table width="100%" cellpadding="10" cellspacing="0" border="1"
+            style="border-collapse:collapse;">
+
+            <tr style="background:#82ae46; color:white;">
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+            </tr>
+
+            {% for item in items %}
+
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.qty }}</td>
+                <td>₹{{ item.price }}</td>
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+        <br>
+
+        <div style="
+            background:#f7fff2;
+            padding:15px;
+            border-left:5px solid #82ae46;
+            font-size:18px;
+            font-weight:bold;
+        ">
+            Total Amount : ₹{{ total_amount }}
+        </div>
+
+        <br>
+
+        <p>
+            We will start preparing your order shortly.
+        </p>
+
+        <p>
+            Thank you for choosing Vegfood.
+        </p>
+
+    </div>
+
+    <div style="
+        background:#222;
+        color:white;
+        text-align:center;
+        padding:15px;
+    ">
+        © Vegfood | Fresh • Healthy • Fast Delivery
+    </div>
+
+</div>
+```
+
+</body>
+
+</html>

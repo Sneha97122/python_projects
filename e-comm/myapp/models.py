@@ -3,6 +3,13 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+class Profile(models.Model):
+    user=models.OneToOneField(User,on_delete=models.CASCADE)
+    profile_image=models.ImageField(upload_to='profile/',default='profile/default.png')
+    phone=models.CharField(max_length=15,blank=True,null=True)
+    city=models.CharField(max_length=50,blank=True,null=True)
+    bio=models.TextField(blank=True,null=True)
+
 class Category(models.Model):
     name=models.CharField(max_length=20)
     image=models.ImageField(upload_to='cat_image/',null=True,blank=True)

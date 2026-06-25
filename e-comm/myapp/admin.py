@@ -22,6 +22,7 @@ admin.site.register(Comment)
 
 admin.site.register(Contect_us)
 
+admin.site.register(Profile)
 
 
 class orderadmin(admin.ModelAdmin):
